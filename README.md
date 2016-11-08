@@ -3,7 +3,7 @@
 
 1. git clone https://github.com/HTAustin/CAL.git
 
-2. Intall Sofia-ML package
+2. Intall Sofia-ML package: https://code.google.com/archive/p/sofia-ml/
 
 
 3. Change the path for Sofia-ML in doAll_Baseline
