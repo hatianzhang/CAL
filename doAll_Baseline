@@ -15,6 +15,8 @@ JUDGECLASS="oldreut"
 #CORPLIST=("robust04_0" "robust04_1" "robust04_2" "robust04_3" "robust04_4" "robust04_5")
 #CORPLIST=("FBIS" "FT" "FR" "LA")
 CORPLIST=("oldreut")
+SOFIA="/home/h435zhan/Develop/sofia-ml-read-only/src/sofia-ml"
+
 for CORP in "${CORPLIST[@]}"
    do
       # if ! [ -e Corpus/"$CORP".tgz ] ; then
@@ -121,14 +123,14 @@ for CORP in "${CORPLIST[@]}"
                echo $RELTRAINDOC $NOTRELTRAINDOC $PREVALENCERATE >> prevalence.rate
                
 
-               ~/Develop/sof*/src/sof*ml --learner_type logreg-pegasos --loop_type roc --lambda $LAMBDA --iterations 200000 --training_file trainset --dimensionality 3300000 --model_out svm_model
+               $SOFIA --learner_type logreg-pegasos --loop_type roc --lambda $LAMBDA --iterations 200000 --training_file trainset --dimensionality 3300000 --model_out svm_model
                #/home/user/svmlight/svm_learn trainset
 
                RES=$?
                echo $RES
                if [ "$RES" -eq "0" ] ; then
                   for z in svm.test.* ; do
-                     ~/Develop/sof*/src/sof*ml --test_file $z --dimensionality 3300000 --model_in svm_model --results_file pout.$z
+                     $SOFIA --test_file $z --dimensionality 3300000 --model_in svm_model --results_file pout.$z
                      #/home/user/svmlight/svm_classify $z svm_model pout.$z
                   done
                else
@@ -143,7 +145,18 @@ for CORP in "${CORPLIST[@]}"
                fi
 
                #sed -e 's/.*\///' -e 's/.*/"&"/' new$N.$TOPIC | tr '\n' ',' | sed -e 's/^/[/' -e 's/,$/]/' | curl -XPOST -H 'Content-Type:application/json' "$TRSERVER/judge/$LOGIN/$TOPIC" -d @- | tr '}' '\n' | grep 'judgement.:1' | cut -d'"' -f4 | sort | join -o2.2 - docfil >> rel.$TOPIC.fil
-               python ../doJudgementMain.py --topic=$TOPIC --judgefile=../judgement/qrels.$JUDGECLASS.list --input=new$N.$TOPIC --output=rel.$TOPIC.Judged.doc.list --memorydumpfile=judge.effort.$TOPIC."$PURPOSE".dump
+               # python ../doJudgementMain.py --topic=$TOPIC --judgefile=../judgement/qrels.$JUDGECLASS.list --input=new$N.$TOPIC --output=rel.$TOPIC.Judged.doc.list --memorydumpfile=judge.effort.$TOPIC."$PURPOSE".dump
+               rm -rf rel.$TOPIC.Judged.doc.list
+               while IFS='' read -r line || [[ -n $line ]]; do
+                  RELFLAG=`cat ../judgement/qrels.$JUDGECLASS.list | grep "$TOPIC 0 $line 1" | wc -l`
+
+                  if [ $RELFLAG -gt "0" ] ; then
+                     echo $line 1 >> rel.$TOPIC.Judged.doc.list
+                     echo $line 1 >> $TOPIC.record.list
+                  else
+                     echo $line 0 >> $TOPIC.record.list
+                  fi
+               done < new$N.$TOPIC
                cat rel.$TOPIC.Judged.doc.list >> rel.$TOPIC.fil
                cat rel.$TOPIC.Judged.doc.list > rel.$TOPIC.$N.Judged.doc.list
 
@@ -161,7 +174,7 @@ for CORP in "${CORPLIST[@]}"
             fi
             done
          done
-         cp judge.effort.$TOPIC."$PURPOSE".dump ../result/dump/"$PURPOSE"/"$CORP"/judge.effort.$TOPIC."$PURPOSE".dump
+         # cp judge.effort.$TOPIC."$PURPOSE".dump ../result/dump/"$PURPOSE"/"$CORP"/judge.effort.$TOPIC."$PURPOSE".dump
 
          rm -rf svm.test.*
          popd
