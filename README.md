@@ -13,3 +13,9 @@ SOFIA="/home/h435zhan/Develop/sofia-ml-read-only/src/sofia-ml"
 
 
 4. The output of BMI are stored in result/ folder. 
+
+
+
+## License
+GNU GPL v3.0
+[![GNU GPL v3.0](http://www.gnu.org/graphics/gplv3-127x51.png)](http://www.gnu.org/licenses/gpl.html)
