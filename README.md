@@ -5,9 +5,9 @@
 
 
 2. Change the path for Sofia-ML in doAll_Baseline
-```
-SOFIA="/home/h435zhan/Develop/sofia-ml-read-only/src/sofia-ml"
-```
+	```
+	SOFIA="/the/path/to/sofia-ml-read-only/src/sofia-ml"
+	```
 
 3. bash doAll_Baseline
 
@@ -17,5 +17,5 @@ SOFIA="/home/h435zhan/Develop/sofia-ml-read-only/src/sofia-ml"
 
 
 ## License
-GNU GPL v3.0
+
 [![GNU GPL v3.0](http://www.gnu.org/graphics/gplv3-127x51.png)](http://www.gnu.org/licenses/gpl.html)
