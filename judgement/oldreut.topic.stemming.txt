@@ -1,0 +1,4 @@
+tr0:acquisition
+tr1:Deutsche Mark
+tr2:groundnut
+tr3:livestock
