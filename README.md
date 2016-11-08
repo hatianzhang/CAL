@@ -1,18 +1,20 @@
 # BMI local Implementation
 
 
-1. Intall Sofia-ML package
+1. git clone https://github.com/HTAustin/CAL.git
+
+2. Intall Sofia-ML package
 
 
-2. Change the path for Sofia-ML in doAll_Baseline
+3. Change the path for Sofia-ML in doAll_Baseline
 	```
 	SOFIA="/the/path/to/sofia-ml-read-only/src/sofia-ml"
 	```
 
-3. bash doAll_Baseline
+4. bash doAll_Baseline
 
 
-4. The output of BMI are stored in result/ folder. 
+5. The output of BMI are stored in result/ folder. 
 
 
 
