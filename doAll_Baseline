@@ -147,6 +147,7 @@ for CORP in "${CORPLIST[@]}"
                #sed -e 's/.*\///' -e 's/.*/"&"/' new$N.$TOPIC | tr '\n' ',' | sed -e 's/^/[/' -e 's/,$/]/' | curl -XPOST -H 'Content-Type:application/json' "$TRSERVER/judge/$LOGIN/$TOPIC" -d @- | tr '}' '\n' | grep 'judgement.:1' | cut -d'"' -f4 | sort | join -o2.2 - docfil >> rel.$TOPIC.fil
                # python ../doJudgementMain.py --topic=$TOPIC --judgefile=../judgement/qrels.$JUDGECLASS.list --input=new$N.$TOPIC --output=rel.$TOPIC.Judged.doc.list --memorydumpfile=judge.effort.$TOPIC."$PURPOSE".dump
                rm -rf rel.$TOPIC.Judged.doc.list
+               touch rel.$TOPIC.Judged.doc.list
                while IFS='' read -r line || [[ -n $line ]]; do
                   RELFLAG=`cat ../judgement/qrels.$JUDGECLASS.list | grep "$TOPIC 0 $line 1" | wc -l`
 
