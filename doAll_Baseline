@@ -159,8 +159,8 @@ for CORP in "${CORPLIST[@]}"
                #       echo $line 0 >> $TOPIC.record.list
                #    fi
                # done < new$N.$TOPIC
-               # cat rel.$TOPIC.Judged.doc.list >> rel.$TOPIC.fil
-               # cat rel.$TOPIC.Judged.doc.list > rel.$TOPIC.$N.Judged.doc.list
+               cat rel.$TOPIC.Judged.doc.list >> rel.$TOPIC.fil
+               cat rel.$TOPIC.Judged.doc.list > rel.$TOPIC.$N.Judged.doc.list
 
                RELFINDDOC=`wc -l < rel.$TOPIC.Judged.doc.list`
                RELRATE=`echo "scale=4; $RELFINDDOC / $L" | bc`
