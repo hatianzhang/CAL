@@ -108,12 +108,12 @@ for CORP in "${CORPLIST[@]}"
                cp $TOPIC.synthetic.seed trainset
                #cut -f2 docfils | join -v1 - rel.$TOPIC.fil > $TOPIC.allNoRel.docfils
                #cut -f1 $TOPIC.allNoRel.docfils | sort -R | head -$R | sort | join - ../svm.fil | sed -e's/[^ ]*/-1/' >> trainset
-               cut -f2 docfils | sort -R | head -$R | sort | join - ../$CORP.svm.fil | sed -e's/[^ ]*/-1/' >> trainset
+               cut -f2 docfils | shuf -n $R | sort | join - ../$CORP.svm.fil | sed -e's/[^ ]*/-1/' >> trainset
                cat new[0-9][0-9].$TOPIC > seed
                #cut -f2 docfil | join - $TOPIC.clusteringJudged.doc.sorted | cut -d' ' -f2 >> seed
                cat seed | sort | join - rel.$TOPIC.fil | sed -e 's/^/1 /' > x
                #cat seed | sort | join -v1 - rel.$TOPIC.fil | join -v1 - $TOPIC.clusteringNotRel.doc.sorted | sort -R | head -50000 | sed -e 's/^/-1 /' >> x
-               cat seed | sort | join -v1 - rel.$TOPIC.fil | sort -R | head -50000 | sed -e 's/^/-1 /' >> x
+               cat seed | sort | join -v1 - rel.$TOPIC.fil | shuf -n 50000 | sed -e 's/^/-1 /' >> x
                sort -k2 x | join -12 - ../$CORP.svm.fil | cut -d' ' -f2- | sort -n >> trainset
                #Calculate relevant documents prevalence rate in the traning set
 
