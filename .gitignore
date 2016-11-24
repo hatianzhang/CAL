@@ -4,3 +4,8 @@
 N
 result/
 tr0*
+athome*
+*.tfdf
+*.concordance
+*.stderr
+*.list
