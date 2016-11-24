@@ -10,12 +10,12 @@
 
 
 PURPOSE=baseline
-JUDGECLASS="athome1"
+JUDGECLASS="oldreut"
 
 #CORPLIST=("robust04_0" "robust04_1" "robust04_2" "robust04_3" "robust04_4" "robust04_5")
 #CORPLIST=("FBIS" "FT" "FR" "LA")
-CORPLIST=("athome1")
-SOFIA="/home/nghelani/cal-fusion/sofia-ml/sofia-ml"
+CORPLIST=("oldreut")
+SOFIA="/home/h435zhan/Develop/sofia-ml-read-only/src/sofia-ml"
 MAXTHREADS=4
 
 for CORP in "${CORPLIST[@]}"
@@ -52,12 +52,6 @@ for CORP in "${CORPLIST[@]}"
          echo "$TOPIC"
          echo "$QUERY"
 
-         # if ! [ $TOPIC == "athome3423" ] ; then
-         #    continue
-         # fi
-
-
-         
          rm -rf result/"$PURPOSE"/"$CORP"/"$TOPIC"/
          mkdir -p result/"$PURPOSE"/"$CORP"/
          mkdir -p result/dump/"$PURPOSE"/"$CORP"/
