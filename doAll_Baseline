@@ -10,12 +10,13 @@
 
 
 PURPOSE=baseline
-JUDGECLASS="oldreut"
+JUDGECLASS="athome1"
 
 #CORPLIST=("robust04_0" "robust04_1" "robust04_2" "robust04_3" "robust04_4" "robust04_5")
 #CORPLIST=("FBIS" "FT" "FR" "LA")
-CORPLIST=("oldreut")
-SOFIA="/home/h435zhan/Develop/sofia-ml-read-only/src/sofia-ml"
+CORPLIST=("athome1")
+SOFIA="/home/nghelani/cal-fusion/sofia-ml/sofia-ml"
+MAXTHREADS=4
 
 for CORP in "${CORPLIST[@]}"
    do
@@ -35,6 +36,13 @@ for CORP in "${CORPLIST[@]}"
       cp "$CORP".svm.fil ../"$CORP".svm.fil
       
       popd
+
+      KEYSIZE=$(awk 'BEGIN{a=0}{len = length($1); a=a<len?len:a}END{print a}' "$CORP".svm.fil)
+      VALSIZE=$(awk 'BEGIN{a=0}{len = length($0); a=a<len?len:a}END{print a}' "$CORP".svm.fil)
+      KEYSIZE=$((KEYSIZE+2))
+      VALSIZE=$((VALSIZE+2))
+      echo "Indexing $COPR.svm.fil, keysize = $KEYSIZE, valsize = $VALSIZE"
+      ./indexer "$CORP".svm.fil "$CORP".db $KEYSIZE $VALSIZE || (echo "Error creating db"; exit 1)
 
       while IFS='' read -r line || [[ -n $line ]]; do
          IFS=':' read -ra TEXT <<< "$line"
@@ -101,20 +109,29 @@ for CORP in "${CORPLIST[@]}"
          sed -e 's/[^ ]*/1/' svm.$TOPIC.seed.doc.fil > $TOPIC.synthetic.seed
 
 
-         for x in 0 1 2 3 4 5 6 7 8 9 ; do
-            for y in 0 1 2 3 4 5 6 7 8 9 ; do
+         for x in {0..9} ; do
+            for y in {0..9} ; do
             if [ $NDUN -lt $NDOCS ] ; then
                export N=$x$y
                cp $TOPIC.synthetic.seed trainset
                #cut -f2 docfils | join -v1 - rel.$TOPIC.fil > $TOPIC.allNoRel.docfils
                #cut -f1 $TOPIC.allNoRel.docfils | sort -R | head -$R | sort | join - ../svm.fil | sed -e's/[^ ]*/-1/' >> trainset
-               cut -f2 docfils | shuf -n $R | sort | join - ../$CORP.svm.fil | sed -e's/[^ ]*/-1/' >> trainset
+               cut -f2 docfils | shuf -n $R | sort | ../indexer ../"$CORP".db $KEYSIZE $VALSIZE | sed -e's/[^ ]*/-1/' >> trainset1 &
+
+               (
                cat new[0-9][0-9].$TOPIC > seed
                #cut -f2 docfil | join - $TOPIC.clusteringJudged.doc.sorted | cut -d' ' -f2 >> seed
                cat seed | sort | join - rel.$TOPIC.fil | sed -e 's/^/1 /' > x
                #cat seed | sort | join -v1 - rel.$TOPIC.fil | join -v1 - $TOPIC.clusteringNotRel.doc.sorted | sort -R | head -50000 | sed -e 's/^/-1 /' >> x
                cat seed | sort | join -v1 - rel.$TOPIC.fil | shuf -n 50000 | sed -e 's/^/-1 /' >> x
-               sort -k2 x | join -12 - ../$CORP.svm.fil | cut -d' ' -f2- | sort -n >> trainset
+               cut -d' ' -f2 x | ../indexer ../$CORP.db $KEYSIZE $VALSIZE | cut -d' ' -f2- |\
+                   paste -d' ' <(cut -d' ' -f1 x) - | sort -n > trainset2
+               ) &
+               wait
+               cat trainset1 trainset2 >> trainset
+               rm trainset1 trainset2
+
+
                #Calculate relevant documents prevalence rate in the traning set
 
                RELTRAINDOC=`grep -E "^1\b" trainset | wc -l`
@@ -123,16 +140,21 @@ for CORP in "${CORPLIST[@]}"
                echo $RELTRAINDOC $NOTRELTRAINDOC $PREVALENCERATE >> prevalence.rate
                
 
-               $SOFIA --learner_type logreg-pegasos --loop_type roc --lambda $LAMBDA --iterations 200000 --training_file trainset --dimensionality 3300000 --model_out svm_model
+               $SOFIA --learner_type logreg-pegasos --loop_type roc --lambda $LAMBDA\
+                   --iterations 200000 --training_file trainset --dimensionality 3300000 --model_out svm_model
                #/home/user/svmlight/svm_learn trainset
 
                RES=$?
                echo $RES
                if [ "$RES" -eq "0" ] ; then
                   for z in svm.test.* ; do
-                     $SOFIA --test_file $z --dimensionality 3300000 --model_in svm_model --results_file pout.$z
+                     while [[ $(jobs | grep 'Running' | wc -l) > $MAXTHREADS ]]; do
+                         sleep 1
+                     done
+                     $SOFIA --test_file $z --dimensionality 3300000 --model_in svm_model --results_file pout.$z &
                      #/home/user/svmlight/svm_classify $z svm_model pout.$z
                   done
+                  wait
                else
                   rm -f pout.svm.test.*
                   cut -f2 docfils | sort -R | cat -n | sort -k2 | sed -e 's/ */-/' > pout.svm.test.1
@@ -187,6 +209,7 @@ for CORP in "${CORPLIST[@]}"
       done < "judgement/$CORP.topic.stemming.txt"
       rm -rf "$CORP".svm.fil
       rm "$CORP".df
+      rm "$COPR".db
 
       rm N
 
