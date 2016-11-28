@@ -41,7 +41,7 @@ for CORP in "${CORPLIST[@]}"
       VALSIZE=$(awk 'BEGIN{a=0}{len = length($0); a=a<len?len:a}END{print a}' "$CORP".svm.fil)
       KEYSIZE=$((KEYSIZE+2))
       VALSIZE=$((VALSIZE+2))
-      echo "Indexing $COPR.svm.fil, keysize = $KEYSIZE, valsize = $VALSIZE"
+      echo "Indexing $CORP.svm.fil, keysize = $KEYSIZE, valsize = $VALSIZE"
       ./indexer "$CORP".svm.fil "$CORP".db $KEYSIZE $VALSIZE || (echo "Error creating db"; exit 1)
 
       while IFS='' read -r line || [[ -n $line ]]; do
@@ -203,7 +203,7 @@ for CORP in "${CORPLIST[@]}"
       done < "judgement/$CORP.topic.stemming.txt"
       rm -rf "$CORP".svm.fil
       rm "$CORP".df
-      rm "$COPR".db
+      rm "$CORP".db
 
       rm N
 
