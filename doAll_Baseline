@@ -142,7 +142,7 @@ for CORP in "${CORPLIST[@]}"
                echo $RES
                if [ "$RES" -eq "0" ] ; then
                   for z in svm.test.* ; do
-                     while [[ $(jobs | grep 'Running' | wc -l) > $MAXTHREADS ]]; do
+                     while [ "$(jobs | grep 'Running' | wc -l)" -ge "$MAXTHREADS" ]; do
                          sleep 1
                      done
                      $SOFIA --test_file $z --dimensionality 3300000 --model_in svm_model --results_file pout.$z &
