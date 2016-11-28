@@ -55,4 +55,5 @@ int main(int argc,char **argv){
         }
         KISSDB_close(&db);
     }
+    return 0;
 }
